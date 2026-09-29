@@ -1,6 +1,5 @@
 #include "convex_hull.hpp"
 #include <algorithm>
-#include <stdexcept>
 
 namespace geometry::convex_hull {
 
@@ -10,12 +9,20 @@ double CrossProduct(Point2D p1, Point2D middle, Point2D p2) {
     return new_p1.Cross(new_p2);
 }
 
-std::vector<Point2D> GrahamScan(std::span<Point2D> points) {
+std::expected<std::vector<Point2D>, std::string> GrahamScan(std::span<Point2D> points) noexcept {
     if (points.size() < 3) {
-        throw std::logic_error("At least three points are required for convex hull.");
+        return std::unexpected<std::string>("At least three points are required for convex hull.");
     }
 
-    auto smallest = *std::min_element(points.begin(), points.end());
+    // Найдена ошибка при помощи сохранения визуализации. Тесты все проходили. Выбиралась точка (1.5, 0), которая явно
+    // лежала внутри! std::min_element использовал operator<, который не задавал строгие правила, а std::sort
+    // начинал с points[0], который мог быть внутренней точкой. Так что без визуализации, которую добавила ИИшка, я бы
+    // этот баг не нашел бы и не пофиксил
+    //
+    // Решил подписать тута =)
+    auto min_it = std::ranges::min_element(points, {}, [](const Point2D &p) { return std::make_pair(p.y, p.x); });
+    std::iter_swap(points.begin(), min_it);
+    auto smallest = points.front();
 
     std::sort(points.begin() + 1, points.end(), [&smallest](const Point2D &p1, const Point2D &p2) {
         static const auto precision = 1e-10;
@@ -35,6 +42,7 @@ std::vector<Point2D> GrahamScan(std::span<Point2D> points) {
         hull.Push(new_p);
     }
 
-    return std::vector{hull.Extract()};}
+    return std::vector{hull.Extract()};
+}
 
 }  // namespace geometry::convex_hull

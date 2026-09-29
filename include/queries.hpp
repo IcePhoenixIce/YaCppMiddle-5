@@ -1,6 +1,7 @@
 #pragma once
 #include "geometry.hpp"
 #include <algorithm>
+#include <limits>
 #include <optional>
 #include <variant>
 
@@ -219,13 +220,13 @@ private:
 struct ShapeToShapeDistanceVisitor {
     std::optional<double> operator()(const Circle &c1, const Circle &c2) const {
         double centerDistance = c1.center_p.DistanceTo(c2.center_p);
-        return std::max(0.0, centerDistance - c1.radius - c2.radius);
+        return std::optional<double>{std::max(0.0, centerDistance - c1.radius - c2.radius)};
     }
 
     std::optional<double> operator()(const Line &l1, const Line &l2) const {
         std::vector<double> distances = {queries::DistanceVisitor{l1.start}(l2), queries::DistanceVisitor{l1.end}(l2),
                                          queries::DistanceVisitor{l2.start}(l1), queries::DistanceVisitor{l2.end}(l1)};
-        return *std::ranges::min_element(distances);
+        return std::optional<double>{*std::ranges::min_element(distances)};
     }
 
     // fallback for all unsupported combinations
@@ -235,38 +236,29 @@ struct ShapeToShapeDistanceVisitor {
     }
 };
 
-
 /*
-* Функции-помощники
-*/
+ * Функции-помощники
+ */
 inline double DistanceToPoint(const Shape &shape, const Point2D &point) {
-
-    /* ваш код с PointToShapeDistanceVisitor здесь*/
-    return 0.0;
+    return std::visit(PointToShapeDistanceVisitor{point}, shape);
 }
 
 inline BoundingBox GetBoundBox(const Shape &shape) {
-
-    /* ваш код с использованием метода BoundBox() здесь */
-    return {};
+    return std::visit([](const auto &s) { return s.BoundBox(); }, shape);
 }
 
 inline double GetHeight(const Shape &shape) {
-
-    /* ваш код с использованием метода Height() здесь */
-    return 0.0;
+    return std::visit([](const auto &s) { return s.Height(); }, shape);
 }
 
 inline bool BoundingBoxesOverlap(const Shape &shape1, const Shape &shape2) {
-   BoundingBox bb1 = GetBoundBox(shape1);
+    BoundingBox bb1 = GetBoundBox(shape1);
     BoundingBox bb2 = GetBoundBox(shape2);
     return bb1.Overlaps(bb2);
 }
 
-std::optional<double> DistanceBetweenShapes(const Shape &shape1, const Shape &shape2) {
-
-    /* ваш код с ShapeToShapeDistanceVisitor здесь*/
-    return std::nullopt;
+inline std::optional<double> DistanceBetweenShapes(const Shape &shape1, const Shape &shape2) {
+    return std::visit(ShapeToShapeDistanceVisitor{}, shape1, shape2);
 }
 
 }  // namespace geometry::queries
