@@ -106,6 +106,8 @@ void Draw(std::span<const geometry::triangulation::DelaunayTriangle> triangles) 
     }
 
     // Save plot to file (написано ИИ)
+    // fh->show();
+
     static int tri_plot_counter = 0;
     std::string filename = "triangles_" + std::to_string(tri_plot_counter++) + ".png";
     save(filename);
