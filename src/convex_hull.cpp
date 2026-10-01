@@ -14,7 +14,7 @@ std::expected<std::vector<Point2D>, std::string> GrahamScan(std::span<Point2D> p
         return std::unexpected<std::string>("At least three points are required for convex hull.");
     }
 
-    // Найдена ошибка при помощи сохранения визуализации. Тесты все проходили. Выбиралась точка (1.5, 0), которая явно
+    // Найдена ошибка при помощи визуализации. Тесты все проходили. Выбиралась точка (1.5, 0), которая явно
     // лежала внутри! std::min_element использовал operator<, который не задавал строгие правила, а std::sort
     // начинал с points[0], который мог быть внутренней точкой. Так что без визуализации, которую добавила ИИшка, я бы
     // этот баг не нашел бы и не пофиксил
@@ -25,7 +25,7 @@ std::expected<std::vector<Point2D>, std::string> GrahamScan(std::span<Point2D> p
     auto smallest = points.front();
 
     std::sort(points.begin() + 1, points.end(), [&smallest](const Point2D &p1, const Point2D &p2) {
-        static const auto precision = 1e-10;
+        static const auto precision = kEpsilon;
 
         double cross = CrossProduct(p1, smallest, p2);
         if (std::abs(cross) < precision) {

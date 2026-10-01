@@ -10,6 +10,8 @@
 
 namespace geometry {
 
+inline constexpr double kEpsilon = 1e-10;
+
 /*
  * Добавьте к методам класса Point2D и Lines2DDyn все необходимые аттрибуты и спецификаторы
  * Важно: Возвращаемый тип и принимаемые аргументы менять не нужно
@@ -20,7 +22,9 @@ struct Point2D {
     constexpr Point2D() noexcept : x(0), y(0) {}
     constexpr Point2D(double x, double y) noexcept : x(x), y(y) {}
 
-    [[nodiscard]] constexpr bool operator<(const Point2D &other) const noexcept { return x < other.x && y < other.y; }
+    [[nodiscard]] constexpr bool operator<(const Point2D &other) const noexcept {
+        return x < other.x || (x == other.x && y < other.y);
+    }
     [[nodiscard]] constexpr bool operator==(const Point2D &other) const noexcept {
         return x == other.x && y == other.y;
     }

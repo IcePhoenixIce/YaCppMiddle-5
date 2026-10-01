@@ -26,7 +26,7 @@ public:
         Point2D p4 = l2.end;
 
         double d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
-        if (std::abs(d) < 1e-10) {
+        if (std::abs(d) < kEpsilon) {
             return std::nullopt;
         }
 
@@ -77,7 +77,7 @@ public:
         if (d > c1.radius + c2.radius || d < std::abs(c1.radius - c2.radius)) {
             return std::nullopt;
         }
-        if (d < 1e-10 && std::abs(c1.radius - c2.radius) < 1e-10) {
+        if (d < kEpsilon && std::abs(c1.radius - c2.radius) < kEpsilon) {
             return std::nullopt;
         }
 

@@ -16,12 +16,12 @@ struct DelaunayTriangle {
     bool ContainsPoint(const Point2D &p) const {
         Point2D center = Circumcenter();
         double radius = Circumradius();
-        return center.DistanceTo(p) <= radius + 1e-10;
+        return center.DistanceTo(p) <= radius + kEpsilon;
     }
 
     Point2D Circumcenter() const {
         double d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
-        if (std::abs(d) < 1e-10) {
+        if (std::abs(d) < kEpsilon) {
             return {(a.x + b.x + c.x) / 3, (a.y + b.y + c.y) / 3};
         }
 
@@ -48,7 +48,7 @@ struct DelaunayTriangle {
         int shared_count = 0;
         for (const Point2D &p1 : this_points) {
             for (const Point2D &p2 : other_points) {
-                if (std::abs(p1.x - p2.x) < 1e-10 && std::abs(p1.y - p2.y) < 1e-10) {
+                if (std::abs(p1.x - p2.x) < kEpsilon && std::abs(p1.y - p2.y) < kEpsilon) {
                     shared_count++;
                     break;
                 }
@@ -71,18 +71,18 @@ struct Edge {
     }
 
     bool operator<(const Edge &other) const {
-        if (std::abs(p1.x - other.p1.x) > 1e-10)
+        if (std::abs(p1.x - other.p1.x) > kEpsilon)
             return p1.x < other.p1.x;
-        if (std::abs(p1.y - other.p1.y) > 1e-10)
+        if (std::abs(p1.y - other.p1.y) > kEpsilon)
             return p1.y < other.p1.y;
-        if (std::abs(p2.x - other.p2.x) > 1e-10)
+        if (std::abs(p2.x - other.p2.x) > kEpsilon)
             return p2.x < other.p2.x;
         return p2.y < other.p2.y;
     }
 
     bool operator==(const Edge &other) const {
-        return std::abs(p1.x - other.p1.x) < 1e-10 && std::abs(p1.y - other.p1.y) < 1e-10 &&
-               std::abs(p2.x - other.p2.x) < 1e-10 && std::abs(p2.y - other.p2.y) < 1e-10;
+        return std::abs(p1.x - other.p1.x) < kEpsilon && std::abs(p1.y - other.p1.y) < kEpsilon &&
+               std::abs(p2.x - other.p2.x) < kEpsilon && std::abs(p2.y - other.p2.y) < kEpsilon;
     }
 };
 
@@ -134,12 +134,12 @@ DelaunayTriangulation(std::span<const Point2D> points) noexcept {
                                        [&bad_triangles](const DelaunayTriangle &t) {
                                            return std::find_if(bad_triangles.begin(), bad_triangles.end(),
                                                                [&t](const DelaunayTriangle &bad) {
-                                                                   return std::abs(t.a.x - bad.a.x) < 1e-10 &&
-                                                                          std::abs(t.a.y - bad.a.y) < 1e-10 &&
-                                                                          std::abs(t.b.x - bad.b.x) < 1e-10 &&
-                                                                          std::abs(t.b.y - bad.b.y) < 1e-10 &&
-                                                                          std::abs(t.c.x - bad.c.x) < 1e-10 &&
-                                                                          std::abs(t.c.y - bad.c.y) < 1e-10;
+                                                                   return std::abs(t.a.x - bad.a.x) < kEpsilon &&
+                                                                          std::abs(t.a.y - bad.a.y) < kEpsilon &&
+                                                                          std::abs(t.b.x - bad.b.x) < kEpsilon &&
+                                                                          std::abs(t.b.y - bad.b.y) < kEpsilon &&
+                                                                          std::abs(t.c.x - bad.c.x) < kEpsilon &&
+                                                                          std::abs(t.c.y - bad.c.y) < kEpsilon;
                                                                }) != bad_triangles.end();
                                        }),
                         triangles.end());
@@ -151,15 +151,15 @@ DelaunayTriangulation(std::span<const Point2D> points) noexcept {
     triangles.erase(
         std::remove_if(triangles.begin(), triangles.end(),
                        [&super1, &super2, &super3](const DelaunayTriangle &t) {
-                           return (std::abs(t.a.x - super1.x) < 1e-10 && std::abs(t.a.y - super1.y) < 1e-10) ||
-                                  (std::abs(t.a.x - super2.x) < 1e-10 && std::abs(t.a.y - super2.y) < 1e-10) ||
-                                  (std::abs(t.a.x - super3.x) < 1e-10 && std::abs(t.a.y - super3.y) < 1e-10) ||
-                                  (std::abs(t.b.x - super1.x) < 1e-10 && std::abs(t.b.y - super1.y) < 1e-10) ||
-                                  (std::abs(t.b.x - super2.x) < 1e-10 && std::abs(t.b.y - super2.y) < 1e-10) ||
-                                  (std::abs(t.b.x - super3.x) < 1e-10 && std::abs(t.b.y - super3.y) < 1e-10) ||
-                                  (std::abs(t.c.x - super1.x) < 1e-10 && std::abs(t.c.y - super1.y) < 1e-10) ||
-                                  (std::abs(t.c.x - super2.x) < 1e-10 && std::abs(t.c.y - super2.y) < 1e-10) ||
-                                  (std::abs(t.c.x - super3.x) < 1e-10 && std::abs(t.c.y - super3.y) < 1e-10);
+                           return (std::abs(t.a.x - super1.x) < kEpsilon && std::abs(t.a.y - super1.y) < kEpsilon) ||
+                                  (std::abs(t.a.x - super2.x) < kEpsilon && std::abs(t.a.y - super2.y) < kEpsilon) ||
+                                  (std::abs(t.a.x - super3.x) < kEpsilon && std::abs(t.a.y - super3.y) < kEpsilon) ||
+                                  (std::abs(t.b.x - super1.x) < kEpsilon && std::abs(t.b.y - super1.y) < kEpsilon) ||
+                                  (std::abs(t.b.x - super2.x) < kEpsilon && std::abs(t.b.y - super2.y) < kEpsilon) ||
+                                  (std::abs(t.b.x - super3.x) < kEpsilon && std::abs(t.b.y - super3.y) < kEpsilon) ||
+                                  (std::abs(t.c.x - super1.x) < kEpsilon && std::abs(t.c.y - super1.y) < kEpsilon) ||
+                                  (std::abs(t.c.x - super2.x) < kEpsilon && std::abs(t.c.y - super2.y) < kEpsilon) ||
+                                  (std::abs(t.c.x - super3.x) < kEpsilon && std::abs(t.c.y - super3.y) < kEpsilon);
                        }),
         triangles.end());
 

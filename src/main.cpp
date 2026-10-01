@@ -83,9 +83,8 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes) {
     std::println("\n=== Shape Extra Analysis ===");
 
     auto above_50 = shapes | views::filter([](const Shape &s) { return queries::GetHeight(s) > 50.0; });
-    auto it = above_50.begin();
-    for (size_t i = 0; i < 3 && it != above_50.end(); ++i, ++it) {
-        std::println("Shape above 50.0: {}", *it);
+    for (const auto &shape : above_50 | views::take(3)) {
+        std::println("Shape above 50.0: {}", shape);
     }
 
     if (!shapes.empty()) {
@@ -118,9 +117,8 @@ int main() {
     for (const auto &shape : shapes) {
         std::visit(
             [&points](const auto &s) {
-                for (const auto &v : s.Vertices()) {
-                    points.push_back(v);
-                }
+                auto verts = s.Vertices();
+                std::copy(verts.begin(), verts.end(), std::back_inserter(points));
             },
             shape);
     }
